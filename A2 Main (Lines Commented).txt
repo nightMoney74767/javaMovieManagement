@@ -1,0 +1,474 @@
+//this is the main Java file that houses the functionality of a database that stores info about DVDs and Blu-Rays
+package uk.ac.chester;
+
+import java.io.*;
+import java.text.DecimalFormat;
+import java.util.*;
+
+//implements Serializable adapted from Andrew's Tutorials (Andrew's Tutorials, n.d)
+public class Main implements Serializable {
+    //end of adapted code
+    //static menu input variable used in multiple methods
+    static String inputMenu = "";
+
+    public static void main(String[] args){
+        //declare arraylist to store each disk
+        ArrayList<DiskProperty> diskCollection = new ArrayList<>();
+
+        //initial disk setup - with the exception of exampleDisk and example2, each disk refers to the stats for officially released movies (Wikipedia, Avengers: Endgame, n.d) (Wikipedia, Avatar (2009 film), n.d)
+        //note: genre, price and parental rating are fictional and have been chosen where appropriate
+        DiskProperty exampleDisk = new DiskProperty("Example", 2021, 60,"Mr Director", "Unknown", 8.99, "U");
+        DiskProperty avengersEndgame = new DiskProperty("Avengers: Endgame", 2019, 181, "Anthony Russo and Joe Russo", "Action/Adventure", 15.99, "12");
+        DiskProperty avatar = new DiskProperty("Avatar", 2009, 162, "James Cameron", "Action/Adventure", 5.99, "PG");
+        DiskProperty example2 = new DiskProperty("Example 2", 2012, 120, "No one", "N/A", 1.99, "12");
+        //add items to arraylist
+//        diskCollection.add(exampleDisk);
+//        diskCollection.add(avengersEndgame);
+//        diskCollection.add(avatar);
+//        diskCollection.add(example2);
+        //initial write to create file - adapted from Andrew's Tutorials (Andrew's Tutorials, n.d)
+//        try {
+//            FileOutputStream fileOutputStream = new FileOutputStream("data.dat");
+//            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+//            objectOutputStream.writeObject(diskCollection);
+//            objectOutputStream.close();
+//            fileOutputStream.close();
+//        } catch (Exception e) {
+//            System.out.println("Error: " + e.getMessage());
+//        }
+        //end of adapted code
+
+        menuOutput(diskCollection);
+    }
+
+    //display menu and ask users to choose an option
+    static ArrayList<DiskProperty> menuOutput (ArrayList<DiskProperty> diskProperties) {
+        System.out.println();
+        boolean inLoop = true;
+        while (inLoop) {
+            Scanner inputScanner = new Scanner(System.in);
+            //clear the contents of object array - prevents disk entries appearing multiple times
+            diskProperties.clear();
+            diskProperties = retrieveDiskInfo(diskProperties);
+
+            System.out.println("Main Menu: ");
+            System.out.println("Please choose from the following options (not case sensitive)");
+            System.out.println("A: Retrieve disk info and present it");
+            System.out.println("B: Add disk data");
+            System.out.println("C: Edit disk data");
+            System.out.println("D: Remove disk data");
+            System.out.println("E: Sort items; least expensive first");
+            System.out.println("F: Sort items; A to Z");
+            System.out.println("G: Find total and average price of all items");
+            System.out.println("H: Sort by year (earliest first)");
+            System.out.println("Z: Exit");
+            inputMenu = inputScanner.next();
+            //make the input lower case
+            inputMenu = inputMenu.toLowerCase(Locale.ROOT);
+            //go to main menu
+            menuSelectionPart1(diskProperties, inputMenu);
+        }
+        return diskProperties;
+    }
+
+    //selects specific option based on menu selection
+    static int menuSelectionPart1 (ArrayList<DiskProperty> diskProperties, String inputMenu) {
+        int outcome = 0; //used to test menu selections
+        int numInput = 0; //used to select which disk item to delete or edit; when adding a new item however, this is not used
+        switch (inputMenu) {
+            case "a": case "c": case "d": //a: output disk info from file; c: edit disk data; d: remove disk data
+//                outputDiskData(diskProperties);
+                outcome = 1;
+                break;
+            case "b": //b: add disk data
+//                inputData(diskProperties, numInput);
+                outcome = 2;
+                break;
+            case "e": //e: sort items; least expensive first
+//                selectItemToSort(diskProperties);
+                outcome = 3;
+                break;
+            case "f": //f: sort items; A to Z
+//                selectItemToSort(diskProperties);
+                outcome = 4;
+                break;
+            default:
+//                menuSelectionPart2(diskProperties, inputMenu, outcome);
+        }
+        return outcome;
+    }
+
+    static int menuSelectionPart2 (ArrayList<DiskProperty> diskProperties, String inputMenu, int outcome) {
+        switch (inputMenu) {
+            case "g": //g: find total and average price
+//                totalAndAveragePrice(diskProperties);
+                outcome = 5;
+                break;
+            case "h": //h: sort by year
+//                selectItemToSort(diskProperties);
+                outcome = 6;
+                break;
+            case "z": //z: exit
+                outcome = 7;
+                System.out.println("The app is now closed");
+                //when the app is terminated, the exit status 2 is used to show that it was caused by user input
+                //adapted from Java how to program (Deitel, H., & Deitel, P., 2014)
+//                System.exit(2);
+                //end of adapted code
+                break;
+            default: //any invalid inputs
+                outcome = 8;
+                System.out.println("Sorry. Not a valid menu option");
+                break;
+        }
+        return outcome;
+    }
+
+    //get arraylist from file
+    static ArrayList<DiskProperty> retrieveDiskInfo(ArrayList<DiskProperty> diskProperties) {
+        //adapted from Andrew's Tutorials (Andrew's Tutorials, n.d)
+        try {
+            FileInputStream fileInputStream = new FileInputStream("data.dat");
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+            //read from arraylist - adapted from HowToDoInJava (Gupta, n.d)
+            diskProperties = (ArrayList<DiskProperty>) objectInputStream.readObject();
+            //end of adapted code
+            objectInputStream.close();
+            fileInputStream.close();
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+        //end of adapted code
+        //back to menu
+        return diskProperties;
+    }
+
+    //display all objects with toString @Override
+    static boolean outputDiskData (ArrayList<DiskProperty> diskProperties) {
+        boolean diskIsEmpty = false;
+        System.out.println();
+        System.out.println("Disk Collection: ");
+        if (diskProperties.size() != 0) {
+            //output all items in collection - formatted by @Override in DiskProperty class
+            for (int i = 0; i < diskProperties.size(); i++) {
+                System.out.println(i + ": " + diskProperties.get(i).toString());
+            }
+            System.out.println("Items in disk: " + diskProperties.size());
+        } else {
+            diskIsEmpty = true;
+            System.out.println("There are no items in your collection");
+        }
+        nextStage(diskProperties, inputMenu);
+        return diskIsEmpty;
+    }
+
+    //determine whether the user intends to edit or remove and object or just to display all of them
+    static int nextStage (ArrayList<DiskProperty> diskProperties, String inputMenu) {
+        int result = 0;
+        switch (inputMenu) {
+            case "a":
+                System.out.println();
+                result = 1;
+                break;
+            case "c": case "d":
+                result = 2;
+//                getSizeOfCollection(diskProperties);
+                break;
+        }
+        return result;
+    }
+
+    //get arraylist size
+    static int getSizeOfCollection (ArrayList<DiskProperty> diskProperties) {
+        int diskSize = 0;
+        for (int i = 0; i < diskProperties.size(); i++) {
+            diskSize++;
+        }
+//        decidePrompt(diskProperties, diskSize, inputMenu);
+        return diskSize;
+    }
+
+    static int decidePrompt (ArrayList<DiskProperty> diskProperties, int diskSize, String inputMenu) {
+        int numInput = 0;
+        int result = 0;
+        if (diskSize == 0) {
+            System.out.println("Sorry. Cannot edit or remove any disks in an empty collection.");
+            System.out.println();
+            return result;
+        } else {
+            switch (inputMenu) {
+                case "c":
+                    System.out.println("Please select the item to edit (if any) using the index numbers on the left or type -1 to cancel");
+                    result = 1;
+                    break;
+                case "d":
+                    System.out.println("Please select the item to remove (if any) using the index numbers on the left or type -1 to cancel");
+                    result = 2;
+                    break;
+            }
+        }
+//        getIndexNumber(diskProperties, diskSize, numInput);
+        return result;
+    }
+
+    //ask user to input index number for each object; typing -1 allows user to cancel
+    static ArrayList<DiskProperty> getIndexNumber (ArrayList<DiskProperty> diskProperties, int diskSize, int numInput) {
+        boolean isEnteringInput = true;
+        while (isEnteringInput) {
+            try {
+                Scanner inputNumberScanner = new Scanner(System.in);
+                numInput = inputNumberScanner.nextInt();
+                if (numInput == -1) {
+                    System.out.println();
+                    return diskProperties;
+                } else if (numInput >= diskSize || numInput < -1) {
+                    System.out.println("Sorry. Input does not match any of the disk index numbers");
+                } else {
+                    isEnteringInput = false;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Sorry. Invalid input");
+            }
+        }
+        editOrRemove(diskProperties, numInput, inputMenu);
+        return diskProperties;
+    }
+
+    static int editOrRemove (ArrayList<DiskProperty> diskProperties, int numInput, String inputMenu) {
+        int result = 0;
+        switch (inputMenu) {
+            case "c":
+//                inputData(diskProperties, numInput);
+                result = 1;
+                break;
+            case "d":
+//                removeDiskData(diskProperties, numInput);
+                result = 2;
+                break;
+        }
+        return result;
+    }
+
+    //edit chosen object in collection
+    static ArrayList<DiskProperty> editDiskData(ArrayList<DiskProperty> diskProperties, int numInput, DiskProperty diskProperty) {
+        diskProperties.set(numInput, diskProperty);
+//        modifyFile(diskProperties);
+        return diskProperties;
+    }
+
+    //remove chosen object from collection
+    static ArrayList<DiskProperty> removeDiskData(ArrayList<DiskProperty> diskProperties, int numInput) {
+        diskProperties.remove(numInput);
+//        modifyFile(diskProperties);
+        return diskProperties;
+    }
+
+    //ask user to input data to add or edit an object - split into the next three methods
+    static ArrayList<DiskProperty> inputData (ArrayList<DiskProperty> diskProperties, int numInput) {
+        System.out.println();
+        System.out.println("Add or Edit a Disk: ");
+        //add or edit new disk data using inputs - where the input variables are integers or doubles, try statements are in place to prevent invalid inputs
+        //when entering the parental rating, only the certificates designed by the BBFC are accepted: U, PG, 12, 15 or 18
+        boolean errorOccurred = false;
+        String newDiskTitle = "";
+        int newDiskYear = 0;
+        int newDiskRunningTime = 0;
+        String newDiskDirector = "";
+        String newDiskGenre = "";
+        double newDiskPrice = 0.0;
+        String newDiskParentalRating = "";
+
+        errorOccurred = inputStrings(diskProperties, numInput, errorOccurred, newDiskTitle, newDiskDirector, newDiskGenre, newDiskParentalRating, newDiskYear, newDiskRunningTime, newDiskPrice);
+        return diskProperties;
+    }
+
+    static Scanner addDiskScanner = new Scanner(System.in);
+    //enter string inputs
+    static boolean inputStrings (ArrayList<DiskProperty> diskProperties, int numInput, boolean errorOccurred, String newDiskTitle, String newDiskDirector,  String newDiskGenre,  String newDiskParentalRating, int newDiskYear, int newDiskRunningTime, double newDiskPrice) {
+//        //enter title
+//        System.out.println("Please enter new disk title");
+//        newDiskTitle = addDiskScanner.nextLine();
+//
+//        //enter director
+//        System.out.println("Please enter new disk director(s)");
+//        newDiskDirector = addDiskScanner.nextLine();
+//
+//        //enter genre
+//        System.out.println("Please enter new disk genre");
+//        newDiskGenre = addDiskScanner.nextLine();
+//
+//        //enter parental rating
+//        System.out.println("Please enter new disk parental rating. Accepted inputs are (not case sensitive): U, PG, 12, 15 or 18");
+//        newDiskParentalRating = addDiskScanner.nextLine();
+        switch (newDiskParentalRating.toLowerCase(Locale.ROOT)) {
+            case "u": case "pg": case "12": case "15": case "18":
+                break;
+            default:
+                System.out.println("Sorry. Not a valid input. Disk save unsuccessful");
+                System.out.println();
+                return errorOccurred = true;
+        }
+//        errorOccurred = inputIntsAndDouble(diskProperties, numInput, errorOccurred, newDiskTitle, newDiskDirector, newDiskGenre, newDiskParentalRating, newDiskYear, newDiskRunningTime, newDiskPrice);
+        return errorOccurred;
+    }
+
+    //enter numerical inputs (two integers and a double)
+    static boolean inputIntsAndDouble (ArrayList<DiskProperty> diskProperties, int numInput, boolean errorOccurred, String newDiskTitle, String newDiskDirector,  String newDiskGenre,  String newDiskParentalRating, int newDiskYear, int newDiskRunningTime, double newDiskPrice) {
+        try {
+//            //enter year
+//            System.out.println("Please enter new disk year");
+//            newDiskYear = addDiskScanner.nextInt();
+//
+//            //enter running time
+//            System.out.println("Please enter new disk running time in minutes");
+//            newDiskRunningTime = addDiskScanner.nextInt();
+//
+//            //enter price
+//            System.out.println("Please enter new disk price in pounds and pence");
+//            newDiskPrice = addDiskScanner.nextDouble();
+        } catch (Exception e) {
+            System.out.println("Sorry. Not a valid input. Disk save unsuccessful. Exception: " + e.getMessage());
+            System.out.println();
+            return errorOccurred = true;
+        }
+//        addOrEditDisk(diskProperties, numInput, newDiskTitle, newDiskDirector, newDiskGenre, newDiskParentalRating, newDiskYear, newDiskRunningTime, newDiskPrice);
+        return errorOccurred;
+    }
+
+    //determine whether the user is adding their chosen inputs in inputData, inputStrings and inputIntsAndDouble based on their selected menu choice from menuSelection
+    static DiskProperty addOrEditDisk (ArrayList<DiskProperty> diskProperties, int numInput, String newDiskTitle, String newDiskDirector,  String newDiskGenre,  String newDiskParentalRating, int newDiskYear, int newDiskRunningTime, double newDiskPrice) {
+        DiskProperty inputDisk = new DiskProperty(newDiskTitle, newDiskYear, newDiskRunningTime, newDiskDirector, newDiskGenre, newDiskPrice, newDiskParentalRating);
+        switch (inputMenu) {
+            case "b":
+                diskProperties.add(inputDisk);
+                addDiskData(diskProperties, inputDisk);
+                break;
+            case "c":
+                editDiskData(diskProperties, numInput, inputDisk);
+                break;
+
+        }
+        return inputDisk;
+    }
+
+    //add new object to disk
+    static ArrayList<DiskProperty> addDiskData(ArrayList<DiskProperty> diskProperties, DiskProperty diskProperty) {
+        diskProperties.add(diskProperty);
+//        modifyFile(diskProperties);
+        return diskProperties;
+    }
+
+    //modify the file by writing the arraylist
+    static boolean modifyFile(ArrayList<DiskProperty> diskProperties) {
+        //write to disk - Andrew's Tutorials (Andrew's Tutorials, n.d)
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream("data.dat");
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+            objectOutputStream.writeObject(diskProperties);
+            objectOutputStream.close();
+            fileOutputStream.close();
+            return true;
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
+        //end of adapted code
+    }
+
+    //select which properties to sort and output the results
+    static ArrayList<DiskProperty> selectItemToSort(ArrayList<DiskProperty> diskProperties) {
+        ArrayList<DiskProperty> listToSort = diskProperties;
+        switch (inputMenu) {
+            case "e":
+                listToSort = sortPriceLowToHigh(listToSort);
+                break;
+            case "f":
+                listToSort = sortNameAToZ(listToSort);
+                break;
+            case "h":
+                listToSort = sortYear(listToSort);
+        }
+        for (DiskProperty diskProperty: listToSort) {
+            System.out.println(diskProperty.toString());
+        }
+        System.out.println();
+        return diskProperties;
+    }
+
+    //sort by price (least expensive first)
+    static ArrayList<DiskProperty> sortPriceLowToHigh(ArrayList<DiskProperty> diskSortPrice) {
+        System.out.println();
+        System.out.println("Sort by Price (least expensive first): ");
+        SortPriceComparator sortPriceComparator = new SortPriceComparator();
+        Collections.sort(diskSortPrice, sortPriceComparator);
+        return diskSortPrice;
+    }
+
+    //sort by name (A to Z)
+    static ArrayList<DiskProperty> sortNameAToZ(ArrayList<DiskProperty> diskSortName) {
+        System.out.println();
+        System.out.println("Sort by Name (A to Z): ");
+        SortNameComparator sortNameComparator = new SortNameComparator();
+        Collections.sort(diskSortName, sortNameComparator);
+        return diskSortName;
+    }
+
+    //find total and average price
+    static DecimalFormat poundPenceFormat = new DecimalFormat("£0.00");
+    static double totalAndAveragePrice(ArrayList<DiskProperty> diskProperties) {
+        System.out.println();
+        System.out.println("Total & Average Price: ");
+        ArrayList<Double> diskPrices = new ArrayList<>();
+        for (DiskProperty diskProperty : diskProperties) {
+            diskPrices.add(diskProperty.getDiskPrice());
+        }
+
+        //process and output total and average in different methods
+        //total price
+        double totalPrice = 0.00;
+        totalPrice = totalPrice(totalPrice, diskPrices);
+
+        //average price
+        double averagePrice = 0.00;
+        averagePrice = averagePrice(totalPrice, diskPrices);
+
+        //clear prices arraylist
+        diskPrices.clear();
+
+        System.out.println();
+        return totalPrice;
+    }
+
+    //total price
+    static double totalPrice (double total, ArrayList<Double> diskPrices) {
+        total = 0.00;
+        double[] diskPricesAsArray = new double[diskPrices.size()];
+        for (int i = 0; i < diskPricesAsArray.length; i++) {
+            diskPricesAsArray[i] = diskPrices.get(i);
+            total += diskPricesAsArray[i];
+        }
+
+        //using decimal formatters, output total price in pounds and pence
+        String totalPriceAsString = poundPenceFormat.format(total);
+        System.out.println("The total price for your collection is " + totalPriceAsString);
+        return total;
+    }
+
+    //average price
+    static double averagePrice (double total, ArrayList<Double> diskPrices) {
+        //using decimal formatters, output average price in pounds and pence
+        double average = total / diskPrices.size();
+        String averagePriceAsString = poundPenceFormat.format(average);
+        System.out.println("The average price for your collection is " + averagePriceAsString);
+        return average;
+    }
+
+    //sort by year (earliest first)
+    static ArrayList<DiskProperty> sortYear(ArrayList<DiskProperty> diskSortYear) {
+        System.out.println();
+        System.out.println("Sort by Year (oldest first): ");
+        SortYearComparator sortYearComparator = new SortYearComparator();
+        Collections.sort(diskSortYear, sortYearComparator);
+        return diskSortYear;
+    }
+}
